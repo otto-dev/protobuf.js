@@ -158,7 +158,7 @@ function genValuePartial_toObject(gen, field, fieldIndex, prop) {
         if (field.resolvedType instanceof Enum) gen
             ("d%s=o.enums===String?types[%i].values[m%s]:m%s", prop, fieldIndex, prop, prop);
         else gen
-            ("d%s=types[%i].toObject(m%s,o)", prop, fieldIndex, prop);
+            ("d%s=types[%i].toObject(m%s||types[%i].create(),o)", prop, fieldIndex, prop, fieldIndex);
     } else {
         var isUnsigned = false;
         switch (field.type) {
@@ -235,6 +235,7 @@ converter.toObject = function toObject(mtype) {
     ("if(o.defaults){");
         for (i = 0; i < normalFields.length; ++i) {
             var field = normalFields[i],
+                index = mtype._fieldsArray.indexOf(field),
                 prop  = util.safeProp(field.name);
             if (field.resolvedType instanceof Enum) gen
         ("d%s=o.enums===String?%j:%j", prop, field.resolvedType.valuesById[field.typeDefault], field.typeDefault);
@@ -252,8 +253,14 @@ converter.toObject = function toObject(mtype) {
             ("d%s=%s", prop, arrayDefault)
             ("if(o.bytes!==Array)d%s=util.newBuffer(d%s)", prop, prop)
         ("}");
-            } else gen
-        ("d%s=%j", prop, field.typeDefault); // also messages (=null)
+            } else if(field.typeDefault != null) gen
+        ("d%s=%j", prop, field.typeDefault);
+            else {
+                genValuePartial_toObject(gen, field, /* sorted */ index, prop);
+                if (field.partOf) gen
+        ("if(o.oneofs)")
+            ("d%s=%j", util.safeProp(field.partOf.name), field.name);
+            }
         } gen
     ("}");
     }
