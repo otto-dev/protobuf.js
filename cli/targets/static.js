@@ -307,6 +307,28 @@ function buildFunction(type, functionName, gen, scope) {
         push("};");
 }
 
+function toJsonType(field) {
+    var type;
+
+    switch (field.type) {
+        case "bytes":
+            type = "string";
+            break;
+        default:
+            if (field.resolve().resolvedType){
+                var isEnum = field.resolvedType instanceof protobuf.Enum;
+                type = exportName(field.resolvedType, !isEnum) + (isEnum ? "" : "Json");
+            }
+            else
+                return toJsType(field);
+    }
+    if (field.map)
+        return "Object.<string," + type + ">";
+    if (field.repeated)
+        return "Array.<" + type + ">";
+    return type;
+}
+
 function toJsType(field) {
     var type;
 
@@ -350,8 +372,7 @@ function toJsType(field) {
     return type;
 }
 
-function buildType(ref, type) {
-
+function interfaceComment(type) {
     if (config.comments) {
         var typeDef = [
             "Properties of " + aOrAn(type.name) + ".",
@@ -369,6 +390,30 @@ function buildType(ref, type) {
         push("");
         pushComment(typeDef);
     }
+}
+
+function jsonInterfaceComment(type) {
+    if (config.comments) {
+        var typeDef = [
+            "Properties of a JSON " + type.name + ".",
+            type.parent instanceof protobuf.Root ? "@exports " + escapeName("I" + type.name + "Json") : "@memberof " + exportName(type.parent),
+            "@interface " + escapeName("I" + type.name + "Json")
+        ];
+        type.fieldsArray.forEach(function(field) {
+            var prop = util.safeProp(field.name); // either .name or ["name"]
+            prop = prop.substring(1, prop.charAt(0) === "[" ? prop.length - 1 : prop.length);
+            var jsType = toJsonType(field);
+            typeDef.push("@property {" + jsType + "} " + prop + " " + (field.comment || type.name + " " + field.name));
+        });
+        push("");
+        pushComment(typeDef);
+    }
+}
+
+
+function buildType(ref, type) {
+    interfaceComment(type)
+    jsonInterfaceComment(type)
 
     // constructor
     push("");
@@ -552,7 +597,7 @@ function buildType(ref, type) {
             "@function fromObject",
             "@memberof " + exportName(type),
             "@static",
-            "@param {Object.<string,*>} " + (config.beautify ? "object" : "d") + " Plain object",
+            "@param {" + exportName(type, true) + "Json} " + (config.beautify ? "object" : "d") + " Plain object",
             "@returns {" + exportName(type) + "} " + type.name
         ]);
         buildFunction(type, "fromObject", protobuf.converter.fromObject(type));
@@ -575,7 +620,7 @@ function buildType(ref, type) {
             "@function toJSON",
             "@memberof " + exportName(type),
             "@instance",
-            "@returns {Object.<string,*>} JSON object"
+            "@returns {" + exportName(type, true) + "Json} " + type.name + " JSON instance"
         ]);
         push(escapeName(type.name) + ".prototype.toJSON = function toJSON() {");
         ++indent;

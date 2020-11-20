@@ -380,8 +380,6 @@ util.oneOfSetter = function setOneOf(fieldNames) {
  *
  * These options are close to proto3's JSON mapping with the exception that internal types like Any are handled just like messages. More precisely:
  *
- * - Longs become strings
- * - Enums become string keys
  * - Bytes become base64 encoded strings
  * - (Sub-)Messages become plain objects
  * - Maps become plain objects with all string keys
@@ -392,10 +390,11 @@ util.oneOfSetter = function setOneOf(fieldNames) {
  * @see https://developers.google.com/protocol-buffers/docs/proto3?hl=en#json
  */
 util.toJSONOptions = {
-    longs: String,
-    enums: String,
+    // longs: String,
+    // enums: String,
     bytes: String,
-    json: true
+    json: true,
+    defaults: true
 };
 
 // Sets up buffer utility according to the environment (called in index-minimal)
