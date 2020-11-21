@@ -403,7 +403,7 @@ function jsonInterfaceComment(type) {
             var prop = util.safeProp(field.name); // either .name or ["name"]
             prop = prop.substring(1, prop.charAt(0) === "[" ? prop.length - 1 : prop.length);
             var jsType = toJsonType(field);
-            typeDef.push("@property {" + jsType + "} " + prop + " " + (field.comment || type.name + " " + field.name));
+            typeDef.push("@property {" + jsType + "} " + (field.partOf ? "[" + prop + "]" : prop) + " " + (field.comment || type.name + " " + field.name));
         });
         push("");
         pushComment(typeDef);
