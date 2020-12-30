@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.0.0](https://www.github.com/otto-dev/protobuf.js/compare/v6.10.2...v7.0.0) (2020-12-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* encoding of empty Buffers (#1514)
+
+### Bug Fixes
+
+* encoding of empty Buffers ([#1514](https://www.github.com/otto-dev/protobuf.js/issues/1514)) ([b4cae07](https://www.github.com/otto-dev/protobuf.js/commit/b4cae07440387399e097058e15e50608a0e764fd)), closes [#1500](https://www.github.com/otto-dev/protobuf.js/issues/1500) [#885](https://www.github.com/otto-dev/protobuf.js/issues/885)
+
 ### [6.10.2](https://www.github.com/protobufjs/protobuf.js/compare/v6.10.1...v6.10.2) (2020-11-13)
 
 
